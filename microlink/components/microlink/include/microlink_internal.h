@@ -444,17 +444,16 @@ struct microlink_s {
      * through microlink_factory_reset. */
     bool identity_persistent;
 
-    /* Last RegisterResponse User block. Headscale returns User.ID=0 and
-     * an empty DisplayName when the supplied auth_key didn't resolve to
-     * a real user — or when the node-key was registered before but the
-     * server-side record is gone. The Register call itself returns 200
-     * in that case, so without surfacing this here the only symptom is
-     * a confusing "node not found" on the next MapRequest.
+    /* Identity from the last RegisterResponse — for display only. A failed
+     * registration is detected from RegisterResponse.Error / NodeKeyExpired /
+     * AuthURL (the fields the reference client acts on), NOT from this block:
+     * User.ID=0 is normal for auth-key and tag-owned nodes, and DisplayName is
+     * documented as an override, so empty is the usual case.
      *
      * register_user_id semantics:
      *   -1 = no RegisterResponse parsed yet this boot
-     *    0 = auth/identity is bad (the failure mode)
-     *   >0 = a real user; register_user_name holds the DisplayName */
+     *    0 = registered with no bound user (auth-key or tag-owned) — NORMAL
+     *   >0 = a real user; register_user_name holds the display name */
     int  register_user_id;
     char register_user_name[48];
 
