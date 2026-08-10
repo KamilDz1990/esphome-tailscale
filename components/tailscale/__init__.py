@@ -39,6 +39,7 @@ CONF_LOGIN_SERVER = "login_server"
 CONF_DISABLE_TELEMETRY = "disable_telemetry"
 CONF_NETCHECK_OVERRIDE = "netcheck_override"
 CONF_NETCHECK_OVERRIDE_THRESHOLD = "netcheck_override_threshold"
+CONF_IPN_VERSION = "ipn_version"
 tailscale_ns = cg.esphome_ns.namespace("tailscale")
 TailscaleComponent = tailscale_ns.class_("TailscaleComponent", cg.Component)
 
@@ -60,6 +61,11 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(
             CONF_NETCHECK_OVERRIDE_THRESHOLD, default="50ms"
         ): cv.positive_time_period_milliseconds,
+        # Reported to the control plane as Hostinfo.IPNVersion. Default off
+        # (omitted): a public client should not claim a version by default.
+        # Set it only to clear the admin console's "Device is too old" gate,
+        # e.g. ipn_version: "1.98.9". See README (Troubleshooting).
+        cv.Optional(CONF_IPN_VERSION, default=""): cv.string,
     }
 )
 
@@ -83,6 +89,7 @@ async def to_code(config):
     )
 
     cg.add(var.set_telemetry_disabled(config[CONF_DISABLE_TELEMETRY]))
+    cg.add(var.set_ipn_version(config[CONF_IPN_VERSION]))
     # Telemetry POSTs over HTTPS via ESP-IDF's esp_http_client, which ESPHome
     # excludes by default to save compile time — re-enable it. (TLS uses the
     # mbedtls certificate bundle already enabled below.)

@@ -172,6 +172,22 @@ ota:
 > [!TIP]
 > **Want only a subset of the Tailscale entities on the device's web UI / in Home Assistant?** Swap the `files:` entry for the minimal variant — `files: [packages/tailscale/tailscale-core.yaml]` — which loads the component without auto-registering any entities. You then declare only the ones you want yourself (any combination of `binary_sensor`, `text_sensor`, `sensor`, `switch`, `text`, `button` blocks under `platform: tailscale`). Useful when you want a clean web UI focused on your own sensors and switches. See the header comment in [`packages/tailscale/tailscale-core.yaml`](packages/tailscale/tailscale-core.yaml) for a complete example.
 
+> [!NOTE]
+> **"Device is too old, please upgrade it" in the admin console?** Tailscale gates some
+> device operations (e.g. reassigning a node's address) on the reported client version,
+> which this component leaves empty by default. Set `ipn_version` to clear the gate:
+>
+> ```yaml
+> tailscale:
+>   auth_key: !secret tailscale_auth_key
+>   ipn_version: "1.98.9"   # optional; omitted (default) = report no version
+> ```
+>
+> Bump the value if the console later calls it too old. Headscale users do not need this.
+> It is reported in `version.Long()` shape; a bare semver like `1.98.9` gets synthetic
+> commit hashes appended automatically so the console displays it. Default-off because a
+> public component should not claim a version it is not.
+
 And add to your `secrets.yaml`:
 
 ```yaml

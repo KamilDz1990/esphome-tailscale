@@ -142,6 +142,13 @@ void TailscaleComponent::start_microlink_() {
   // a device far from that region relays through it forever.
   config.netcheck_override_enabled = this->netcheck_override_;
   config.netcheck_override_threshold_ms = this->netcheck_override_threshold_ms_;
+  // Hostinfo.IPNVersion: tailscale parses this as version.Long() ("x.y.z-t<hash>-g<hash>");
+  // a value missing the hash suffix is silently not displayed, so accept a bare "1.98.9"
+  // and append synthetic hashes. Empty => field omitted entirely (the default).
+  if (!this->ipn_version_.empty() && this->ipn_version_.find('-') == std::string::npos) {
+    this->ipn_version_ += "-t00000000000-g00000000000";
+  }
+  config.ipn_version = this->ipn_version_.empty() ? nullptr : this->ipn_version_.c_str();
 
   // Mask the auth key: show only the prefix so "tskey-auth-..." vs "tskey-client-..."
   // is still distinguishable in logs without leaking the secret portion.

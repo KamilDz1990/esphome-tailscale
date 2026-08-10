@@ -104,6 +104,13 @@ extern "C" {
 #define ML_CTRL_PORT            443
 #define ML_CTRL_PROTOCOL_VER    131
 
+/* Hostinfo.IPNVersion is supplied per-device via microlink_config_t.ipn_version
+ * (the ESPHome `ipn_version:` option). Empty/NULL => the field is omitted, so the
+ * admin console shows no client version. tailscale parses it as version.Long()
+ * ("x.y.z-t<hash>-g<hash>", version/version.go:73-82); a string missing the hash
+ * suffix is silently not displayed. Left unset it can trip "Device is too old" and
+ * block device operations - see README (Troubleshooting). */
+
 /* DISCO timing (from tailscaled - MUST match for correct behavior) */
 #define ML_DISCO_PING_INTERVAL_MS       5000
 #define ML_DISCO_HEARTBEAT_MS           3000

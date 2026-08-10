@@ -27,6 +27,9 @@ typedef struct microlink_s microlink_t;
 typedef struct {
     const char *auth_key;       /* Tailscale auth key (tskey-auth-...) */
     const char *device_name;    /* Device hostname on the tailnet */
+    const char *ipn_version;    /* Hostinfo.IPNVersion, version.Long() shape
+                                 * ("x.y.z-t<hash>-g<hash>"). NULL/empty = omit the
+                                 * field (report no client version). */
     bool enable_derp;           /* Enable DERP relay (default: true) */
     bool enable_stun;           /* Enable STUN endpoint discovery */
     bool enable_disco;          /* Enable DISCO NAT traversal */

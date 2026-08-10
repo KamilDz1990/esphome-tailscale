@@ -40,6 +40,7 @@ class TailscaleComponent : public Component {
   // Setters called from codegen
   void set_auth_key(const std::string &key) { this->auth_key_ = key; }
   void set_hostname(const std::string &hostname) { this->hostname_ = hostname; }
+  void set_ipn_version(const std::string &v) { this->ipn_version_ = v; }
   void set_max_peers(uint8_t max) { this->max_peers_ = max; }
   void set_login_server(const std::string &server) { this->login_server_ = server; }
   void set_telemetry_disabled(bool disabled) { this->telemetry_disabled_ = disabled; }
@@ -150,6 +151,7 @@ class TailscaleComponent : public Component {
   // Config
   std::string auth_key_;
   std::string hostname_;
+  std::string ipn_version_;  // Hostinfo.IPNVersion; empty = report nothing (default)
   uint8_t max_peers_{16};
   std::string login_server_;
   bool telemetry_disabled_{false};
