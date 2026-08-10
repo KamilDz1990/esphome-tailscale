@@ -43,6 +43,8 @@ class TailscaleComponent : public Component {
   void set_max_peers(uint8_t max) { this->max_peers_ = max; }
   void set_login_server(const std::string &server) { this->login_server_ = server; }
   void set_telemetry_disabled(bool disabled) { this->telemetry_disabled_ = disabled; }
+  void set_netcheck_override(bool enabled) { this->netcheck_override_ = enabled; }
+  void set_netcheck_override_threshold(uint32_t ms) { this->netcheck_override_threshold_ms_ = ms; }
 #ifdef USE_SWITCH
   void set_debug_log_switch(switch_::Switch *sw) { this->debug_log_switch_ = sw; }
 #endif
@@ -151,6 +153,8 @@ class TailscaleComponent : public Component {
   uint8_t max_peers_{16};
   std::string login_server_;
   bool telemetry_disabled_{false};
+  bool netcheck_override_{false};
+  uint32_t netcheck_override_threshold_ms_{50};
 
   // Runtime
   microlink_t *ml_{nullptr};

@@ -37,6 +37,8 @@ CONF_HOSTNAME = "hostname"
 CONF_MAX_PEERS = "max_peers"
 CONF_LOGIN_SERVER = "login_server"
 CONF_DISABLE_TELEMETRY = "disable_telemetry"
+CONF_NETCHECK_OVERRIDE = "netcheck_override"
+CONF_NETCHECK_OVERRIDE_THRESHOLD = "netcheck_override_threshold"
 tailscale_ns = cg.esphome_ns.namespace("tailscale")
 TailscaleComponent = tailscale_ns.class_("TailscaleComponent", cg.Component)
 
@@ -48,6 +50,16 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MAX_PEERS, default=16): cv.int_range(min=1, max=64),
         cv.Optional(CONF_LOGIN_SERVER, default=""): cv.string,
         cv.Optional(CONF_DISABLE_TELEMETRY, default=False): cv.boolean,
+        # Measure every DERP region and adopt the fastest one instead of the
+        # region the control plane echoed back. Off by default: a home-region
+        # change has to be announced to every peer, so it is disruptive, and
+        # the current selection logic is a plain threshold. Useful when the
+        # device is far from the default region (e.g. Frankfurt fallback on a
+        # device in Australia) — see the README.
+        cv.Optional(CONF_NETCHECK_OVERRIDE, default=False): cv.boolean,
+        cv.Optional(
+            CONF_NETCHECK_OVERRIDE_THRESHOLD, default="50ms"
+        ): cv.positive_time_period_milliseconds,
     }
 )
 
@@ -62,6 +74,13 @@ async def to_code(config):
 
     if config[CONF_LOGIN_SERVER]:
         cg.add(var.set_login_server(config[CONF_LOGIN_SERVER]))
+
+    cg.add(var.set_netcheck_override(config[CONF_NETCHECK_OVERRIDE]))
+    cg.add(
+        var.set_netcheck_override_threshold(
+            config[CONF_NETCHECK_OVERRIDE_THRESHOLD].total_milliseconds
+        )
+    )
 
     cg.add(var.set_telemetry_disabled(config[CONF_DISABLE_TELEMETRY]))
     # Telemetry POSTs over HTTPS via ESP-IDF's esp_http_client, which ESPHome

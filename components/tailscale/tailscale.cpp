@@ -137,6 +137,11 @@ void TailscaleComponent::start_microlink_() {
   config.device_name = this->hostname_.empty() ? nullptr : this->hostname_.c_str();
   config.max_peers = this->max_peers_;
   config.ctrl_host = this->login_server_.empty() ? nullptr : this->login_server_.c_str();
+  // Netcheck-driven home-DERP selection. Without this the region microlink
+  // starts on is whatever the control plane echoed back, which never changes —
+  // a device far from that region relays through it forever.
+  config.netcheck_override_enabled = this->netcheck_override_;
+  config.netcheck_override_threshold_ms = this->netcheck_override_threshold_ms_;
 
   // Mask the auth key: show only the prefix so "tskey-auth-..." vs "tskey-client-..."
   // is still distinguishable in logs without leaking the secret portion.
@@ -355,6 +360,10 @@ void TailscaleComponent::dump_config() {
   ESP_LOGCONFIG(TAG, "  Max Peers: %u", this->max_peers_);
   if (!this->login_server_.empty()) {
     ESP_LOGCONFIG(TAG, "  Login Server: %s", this->login_server_.c_str());
+  }
+  if (this->netcheck_override_) {
+    ESP_LOGCONFIG(TAG, "  Netcheck Override: enabled (threshold %ums)",
+                  (unsigned) this->netcheck_override_threshold_ms_);
   }
   ESP_LOGCONFIG(TAG, "  Debug Log: switch-controlled (NVS-persisted)");
 }

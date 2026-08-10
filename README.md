@@ -404,6 +404,7 @@ tailscale:
   hostname: "esp32-tailscale"            # optional, default empty → control plane auto-assigns
   max_peers: 16                          # optional, default 16, range 1–64
   login_server: ""                       # optional, empty → Tailscale SaaS; set for Headscale / self-hosted
+  netcheck_override: false               # optional, default false — pick the DERP region by measured latency
 ```
 
 | Option | Default | Description |
@@ -413,6 +414,8 @@ tailscale:
 | `max_peers` | `16` | Maximum number of peers to track. Raise if your tailnet has more than 16 nodes (up to 64). |
 | `login_server` | `""` | Custom control-plane host. Empty uses the official Tailscale SaaS coordinator. Set to a Headscale (or other Tailscale-compatible) coordinator to point the node elsewhere. Accepts a bare hostname, an IP, `host:port`, or a full `http://host[:port]` / `https://host[:port]` URL. HTTPS is validated against the ESP-IDF public-CA bundle (Let's Encrypt etc.; self-signed certs are not supported). Authentication and initial registration work end-to-end against Headscale 0.23.0; see *Custom control plane (Headscale)* under Deployment Notes for the current caveats. Leave empty for Tailscale SaaS. |
 | `disable_telemetry` | `false` | Set to `true` to turn off the anonymous telemetry (see [Telemetry](#telemetry)). |
+| `netcheck_override` | `false` | Measure the round-trip time to every DERP region and use the fastest one as the node's home relay, instead of the region the control plane reports. See *Picking the DERP region* below before enabling. |
+| `netcheck_override_threshold` | `50ms` | Only switch when the measured region is at least this much faster than the current one. Ignored unless `netcheck_override` is `true`. Prevents flapping between regions with near-identical latency. |
 
 > **No `update_interval`.** The component is fully event-driven: sensors publish only when the underlying state actually changes. There is no polling loop to tune — and nothing to reduce CPU/network cost by raising.
 
@@ -650,6 +653,25 @@ On phone tethering or carrier-grade NAT, the coordinator still advertises each p
 Home-WiFi and direct-UDP-reachable networks are unaffected — the self-heal branch is only taken when the first connect actually fails, so the fast direct path stays fast there.
 
 Direct UDP can still work through CGNAT for peers with publicly reachable endpoints (cloud VMs, VPS, datacenter servers). Symmetric NAT on both ends is what actually breaks hole-punching; a one-sided CGNAT is usually traversable.
+
+### Picking the DERP region
+
+Every node tells the control plane which DERP region is its *home relay* — the one other peers dial when they cannot reach it directly. This component reports the region the control plane last gave it, and the built-in fallback is region 4 (Frankfurt). For a device in Europe that is fine. For a device far from it, every relayed connection crosses a continent: measurements from a board in Australia showed ~700–900 ms to Frankfurt where Sydney answered in ~50 ms, and an OTA update over the relay took **498 s instead of 26 s**.
+
+Setting `netcheck_override: true` makes the device measure the round-trip time to every region in the tailnet's DERP map and adopt the fastest one as its home relay:
+
+```yaml
+tailscale:
+  auth_key: !secret tailscale_auth_key
+  netcheck_override: true
+  netcheck_override_threshold: 50ms   # only switch if it's at least this much faster
+```
+
+It is off by default because a home-region change has to be announced to every peer before it takes effect, so switching is disruptive, and on a device already near the default region there is nothing to gain. Turn it on when the device is far from Frankfurt and relays (rather than connects directly) to its peers — a device that always has direct paths never uses its home relay at all.
+
+The threshold exists to prevent flapping: with two regions of near-identical latency, a device that re-picks on every measurement would keep re-announcing itself, and each announcement is a window where peers are still dialling the old region. Raise it if you see the home region changing repeatedly in the log; lower it only if a genuinely better region is being ignored.
+
+Self-hosted Headscale usually publishes exactly one (embedded) region, in which case this option has nothing to choose between and changes nothing.
 
 ### Hardware realities
 
