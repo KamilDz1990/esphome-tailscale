@@ -475,7 +475,7 @@ void TailscaleComponent::state_callback(microlink_t *ml, microlink_state_t state
 
       self->state_changed_ = true;
     }
-    
+
   } else if (state != ML_STATE_CONNECTED) {
     self->connected_since_ms_ = 0;
     self->tailnet_name_.clear();
@@ -492,6 +492,7 @@ void TailscaleComponent::state_callback(microlink_t *ml, microlink_state_t state
       self->gateway_napt_active_ = false;
       self->state_changed_ = true;
     }
+  }
 }
 
 void TailscaleComponent::peer_callback(microlink_t *ml, const microlink_peer_info_t *peer,
