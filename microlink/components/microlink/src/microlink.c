@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <time.h>
+#include "esp_netif.h"
+#include "lwip/lwip_napt.h"
+#include "lwip/netif.h"
 #include "lwip/sockets.h"
 #include "wireguard-platform.h"
 
@@ -28,6 +31,11 @@
 #endif
 
 static const char *TAG = "microlink";
+
+typedef struct {
+    struct netif *netif;
+    bool enable;
+} wg_napt_ctx_t;
 
 /* NVS keys */
 #define NVS_NAMESPACE       "microlink"
@@ -158,6 +166,80 @@ esp_err_t microlink_factory_reset(void) {
 /* ============================================================================
  * Public API
  * ========================================================================== */
+
+static esp_err_t microlink_set_wg_napt_api(void *arg)
+{
+    wg_napt_ctx_t *ctx = (wg_napt_ctx_t *) arg;
+
+    if (ctx == NULL || ctx->netif == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (ctx->enable && !netif_is_up(ctx->netif)) {
+        ESP_LOGW(TAG, "Cannot enable WireGuard NAPT: netif is down");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    int ret = ip_napt_enable_netif(
+        ctx->netif,
+        ctx->enable ? 1 : 0
+    );
+
+    ESP_LOGI(
+        TAG,
+        "WireGuard NAPT request: enable=%d ret=%d netif=%c%c%d",
+        ctx->enable ? 1 : 0,
+        ret,
+        ctx->netif->name[0],
+        ctx->netif->name[1],
+        ctx->netif->num
+    );
+
+    return ret ? ESP_OK : ESP_FAIL;
+}
+
+
+esp_err_t microlink_set_wg_napt(microlink_t *ml, bool enable)
+{
+#if !IP_NAPT
+    (void) ml;
+    (void) enable;
+
+    ESP_LOGE(TAG, "WireGuard NAPT unavailable: IP_NAPT not compiled");
+    return ESP_ERR_NOT_SUPPORTED;
+#else
+
+    if (ml == NULL || ml->wg_netif == NULL) {
+        ESP_LOGW(TAG, "WireGuard NAPT: WG netif not ready");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    wg_napt_ctx_t ctx = {
+        .netif = (struct netif *) ml->wg_netif,
+        .enable = enable,
+    };
+
+    esp_err_t ret =
+        esp_netif_tcpip_exec(microlink_set_wg_napt_api, &ctx);
+
+    if (ret == ESP_OK) {
+        ESP_LOGI(
+            TAG,
+            "WireGuard NAPT %s",
+            enable ? "ENABLED" : "DISABLED"
+        );
+    } else {
+        ESP_LOGE(
+            TAG,
+            "WireGuard NAPT %s failed: %s",
+            enable ? "enable" : "disable",
+            esp_err_to_name(ret)
+        );
+    }
+
+    return ret;
+#endif
+}
 
 microlink_t *microlink_init(const microlink_config_t *config) {
     if (!config || !config->auth_key) {
