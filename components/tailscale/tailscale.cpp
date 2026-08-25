@@ -137,6 +137,17 @@ void TailscaleComponent::start_microlink_() {
   config.device_name = this->hostname_.empty() ? nullptr : this->hostname_.c_str();
   config.max_peers = this->max_peers_;
   config.ctrl_host = this->login_server_.empty() ? nullptr : this->login_server_.c_str();
+
+  config.advertise_routes =
+      this->advertise_routes_.empty()
+          ? nullptr
+          : this->advertise_routes_.c_str();
+
+  if (config.advertise_routes != nullptr) {
+    ESP_LOGI(TAG, "Advertising subnet route: %s",
+             config.advertise_routes);
+  }
+  
   // Netcheck-driven home-DERP selection. Without this the region microlink
   // starts on is whatever the control plane echoed back, which never changes —
   // a device far from that region relays through it forever.
