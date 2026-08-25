@@ -123,6 +123,7 @@ async def to_code(config):
     add_idf_sdkconfig_option("CONFIG_SPIRAM_MODE_OCT", True)
     add_idf_sdkconfig_option("CONFIG_SPIRAM_SPEED_80M", True)
     add_idf_sdkconfig_option("CONFIG_LWIP_IP_FORWARD", True)
+    add_idf_sdkconfig_option("CONFIG_LWIP_IPV4_NAPT", True)
     add_idf_sdkconfig_option("CONFIG_LWIP_IPV6", True)
     add_idf_sdkconfig_option("CONFIG_LWIP_CHECK_THREAD_SAFETY", False)
     add_idf_sdkconfig_option("CONFIG_LWIP_MAX_SOCKETS", 24)
