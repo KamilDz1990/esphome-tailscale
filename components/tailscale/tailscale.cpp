@@ -475,7 +475,6 @@ void TailscaleComponent::state_callback(microlink_t *ml, microlink_state_t state
 
       self->state_changed_ = true;
     }
-}
     
   } else if (state != ML_STATE_CONNECTED) {
     self->connected_since_ms_ = 0;
