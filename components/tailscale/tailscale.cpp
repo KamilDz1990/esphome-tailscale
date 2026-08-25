@@ -141,6 +141,18 @@ void TailscaleComponent::start_microlink_() {
 
   microlink_config_t config = {};
   const std::string &effective_key = this->auth_key_overridden_ ? this->runtime_auth_key_ : this->auth_key_;
+
+  if (effective_key.empty()) {
+    static uint32_t last_no_key_log_ms = 0;
+
+    if (millis() - last_no_key_log_ms > 30000 || last_no_key_log_ms == 0) {
+      last_no_key_log_ms = millis();
+      ESP_LOGW(TAG, "Tailscale not started: no auth key configured");
+    }
+
+    return;
+  }
+  
   config.auth_key = effective_key.c_str();
   config.device_name = this->hostname_.empty() ? nullptr : this->hostname_.c_str();
   config.max_peers = this->max_peers_;
