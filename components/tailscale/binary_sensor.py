@@ -8,6 +8,10 @@ CONF_TAILSCALE_ID = "tailscale_id"
 
 CONFIG_SCHEMA = cv.Schema(
     {
+        cv.Optional("subnet_router"): binary_sensor.binary_sensor_schema(
+            device_class="connectivity",
+            entity_category="diagnostic",
+        ),
         cv.GenerateID(CONF_TAILSCALE_ID): cv.use_id(TailscaleComponent),
         cv.Optional("connected"): binary_sensor.binary_sensor_schema(
             device_class="connectivity",
@@ -30,6 +34,9 @@ CONFIG_SCHEMA = cv.Schema(
 
 async def to_code(config):
     parent = await cg.get_variable(config[CONF_TAILSCALE_ID])
+    if "subnet_router" in config:
+        subnet = await binary_sensor.new_binary_sensor(config["subnet_router"])
+        cg.add(parent.set_subnet_router_binary_sensor(subnet))
     if "connected" in config:
         sens = await binary_sensor.new_binary_sensor(config["connected"])
         cg.add(parent.set_connected_binary_sensor(sens))
