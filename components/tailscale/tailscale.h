@@ -43,6 +43,7 @@ class TailscaleComponent : public Component {
   void set_ipn_version(const std::string &v) { this->ipn_version_ = v; }
   void set_max_peers(uint8_t max) { this->max_peers_ = max; }
   void set_login_server(const std::string &server) { this->login_server_ = server; }
+  void set_advertise_routes(const std::string &routes) { this->advertise_routes_ = routes; }
   void set_telemetry_disabled(bool disabled) { this->telemetry_disabled_ = disabled; }
   void set_netcheck_override(bool enabled) { this->netcheck_override_ = enabled; }
   void set_netcheck_override_threshold(uint32_t ms) { this->netcheck_override_threshold_ms_ = ms; }
@@ -154,6 +155,7 @@ class TailscaleComponent : public Component {
   std::string ipn_version_;  // Hostinfo.IPNVersion; empty = report nothing (default)
   uint8_t max_peers_{16};
   std::string login_server_;
+  std::string advertise_routes_;
   bool telemetry_disabled_{false};
   bool netcheck_override_{false};
   uint32_t netcheck_override_threshold_ms_{50};
