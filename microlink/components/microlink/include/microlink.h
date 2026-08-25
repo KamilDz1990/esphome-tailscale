@@ -201,6 +201,15 @@ microlink_state_t microlink_get_state(const microlink_t *ml);
 bool microlink_is_connected(const microlink_t *ml);
 
 /**
+ * @brief Enable or disable NAPT on the WireGuard interface.
+ *
+ * Used for Tailscale subnet-router gateway mode.
+ * Traffic received from Tailscale and forwarded to LAN
+ * will use the ESP32 LAN address as source.
+ */
+esp_err_t microlink_set_wg_napt(microlink_t *ml, bool enable);
+
+/**
  * @brief Get our assigned VPN IP
  * @return VPN IP in host byte order, 0 if not yet assigned
  */
