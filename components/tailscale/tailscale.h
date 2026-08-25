@@ -44,6 +44,7 @@ class TailscaleComponent : public Component {
   void set_max_peers(uint8_t max) { this->max_peers_ = max; }
   void set_login_server(const std::string &server) { this->login_server_ = server; }
   void set_advertise_routes(const std::string &routes) { this->advertise_routes_ = routes; }
+  void set_gateway_snat(bool enabled) { this->gateway_snat_ = enabled; }
   void set_telemetry_disabled(bool disabled) { this->telemetry_disabled_ = disabled; }
   void set_netcheck_override(bool enabled) { this->netcheck_override_ = enabled; }
   void set_netcheck_override_threshold(uint32_t ms) { this->netcheck_override_threshold_ms_ = ms; }
@@ -58,6 +59,9 @@ class TailscaleComponent : public Component {
 #endif
 
 #ifdef USE_BINARY_SENSOR
+  void set_subnet_router_binary_sensor(binary_sensor::BinarySensor *sensor) {
+    this->subnet_router_sensor_ = sensor;
+  }
   void set_connected_binary_sensor(binary_sensor::BinarySensor *sensor) {
     this->connected_sensor_ = sensor;
   }
@@ -156,6 +160,7 @@ class TailscaleComponent : public Component {
   uint8_t max_peers_{16};
   std::string login_server_;
   std::string advertise_routes_;
+  bool gateway_snat_{false};
   bool telemetry_disabled_{false};
   bool netcheck_override_{false};
   uint32_t netcheck_override_threshold_ms_{50};
@@ -175,6 +180,7 @@ class TailscaleComponent : public Component {
   uint32_t microlink_start_ms_{0};
   bool registration_failed_logged_{false};
   bool initial_publish_done_{false};
+  bool gateway_napt_active_{false};
   std::atomic<bool> vpn_stopping_{false};
 
   // Reconnect state machine
@@ -197,6 +203,7 @@ class TailscaleComponent : public Component {
 
 #ifdef USE_BINARY_SENSOR
   binary_sensor::BinarySensor *connected_sensor_{nullptr};
+  binary_sensor::BinarySensor *subnet_router_sensor_{nullptr};
   binary_sensor::BinarySensor *key_expiry_warning_sensor_{nullptr};
   binary_sensor::BinarySensor *ha_connected_sensor_{nullptr};
   binary_sensor::BinarySensor *vpn_auto_rollback_sensor_{nullptr};
