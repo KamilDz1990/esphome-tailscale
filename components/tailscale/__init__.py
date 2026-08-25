@@ -37,6 +37,7 @@ CONF_HOSTNAME = "hostname"
 CONF_MAX_PEERS = "max_peers"
 CONF_LOGIN_SERVER = "login_server"
 CONF_ADVERTISE_ROUTES = "advertise_routes"
+CONF_GATEWAY_SNAT = "gateway_snat"
 CONF_DISABLE_TELEMETRY = "disable_telemetry"
 CONF_NETCHECK_OVERRIDE = "netcheck_override"
 CONF_NETCHECK_OVERRIDE_THRESHOLD = "netcheck_override_threshold"
@@ -52,6 +53,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_MAX_PEERS, default=16): cv.int_range(min=1, max=64),
         cv.Optional(CONF_LOGIN_SERVER, default=""): cv.string,
         cv.Optional(CONF_ADVERTISE_ROUTES, default=""): cv.string,
+        cv.Optional(CONF_GATEWAY_SNAT, default=False): cv.boolean,
         cv.Optional(CONF_DISABLE_TELEMETRY, default=False): cv.boolean,
         # Measure every DERP region and adopt the fastest one instead of the
         # region the control plane echoed back. Off by default: a home-region
@@ -86,6 +88,7 @@ async def to_code(config):
     if config[CONF_ADVERTISE_ROUTES]:
         cg.add(var.set_advertise_routes(config[CONF_ADVERTISE_ROUTES]))
 
+    cg.add(var.set_gateway_snat(config[CONF_GATEWAY_SNAT]))
     cg.add(var.set_netcheck_override(config[CONF_NETCHECK_OVERRIDE]))
     cg.add(
         var.set_netcheck_override_threshold(
