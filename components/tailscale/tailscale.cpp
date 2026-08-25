@@ -30,9 +30,17 @@ static constexpr uint32_t STOP_TIMEOUT_MS = 30000;
 
 static void microlink_stop_task(void *arg) {
   auto *ml = static_cast<microlink_t *>(arg);
+
+  // Make sure gateway NAPT is removed before WG netif is destroyed.
+  esp_err_t napt_ret = microlink_set_wg_napt(ml, false);
+  if (napt_ret == ESP_OK) {
+    ESP_LOGI(TAG, "Gateway NAPT disabled before MicroLink shutdown");
+  }
+
   microlink_stop(ml);
   vTaskDelay(pdMS_TO_TICKS(5000));
   microlink_destroy(ml);
+
   s_stop_in_progress.store(false);
   ESP_LOGI(TAG, "Microlink cleanup complete");
   vTaskDelete(nullptr);
@@ -466,16 +474,6 @@ void TailscaleComponent::state_callback(microlink_t *ml, microlink_state_t state
       }
 
       self->state_changed_ = true;
-    }
-
-    if (napt_ret == ESP_OK) {
-        ESP_LOGI(TAG, "Tailscale Gateway NAPT enabled");
-    } else {
-        ESP_LOGE(
-            TAG,
-            "Failed to enable Tailscale Gateway NAPT: %d",
-            napt_ret
-        );
     }
 }
     
