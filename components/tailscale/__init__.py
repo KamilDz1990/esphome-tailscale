@@ -48,7 +48,7 @@ TailscaleComponent = tailscale_ns.class_("TailscaleComponent", cg.Component)
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(): cv.declare_id(TailscaleComponent),
-        cv.Required(CONF_AUTH_KEY): cv.string,
+        cv.Optional(CONF_AUTH_KEY, default=""): cv.string,
         cv.Optional(CONF_HOSTNAME, default=""): cv.string,
         cv.Optional(CONF_MAX_PEERS, default=16): cv.int_range(min=1, max=64),
         cv.Optional(CONF_LOGIN_SERVER, default=""): cv.string,
