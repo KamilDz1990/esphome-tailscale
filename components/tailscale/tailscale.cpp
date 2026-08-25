@@ -443,6 +443,27 @@ void TailscaleComponent::state_callback(microlink_t *ml, microlink_state_t state
 
     // Check if use_address needs updating (init mode or IP mismatch)
     self->check_ip_config_(ip_str);
+
+    if (!self->advertise_routes_.empty()) {
+    ESP_LOGI(
+        TAG,
+        "Subnet routing enabled for: %s",
+        self->advertise_routes_.c_str()
+    );
+
+    esp_err_t napt_ret = microlink_set_wg_napt(ml, true);
+
+    if (napt_ret == ESP_OK) {
+        ESP_LOGI(TAG, "Tailscale Gateway NAPT enabled");
+    } else {
+        ESP_LOGE(
+            TAG,
+            "Failed to enable Tailscale Gateway NAPT: %d",
+            napt_ret
+        );
+    }
+}
+    
   } else if (state != ML_STATE_CONNECTED) {
     self->connected_since_ms_ = 0;
     self->tailnet_name_.clear();
