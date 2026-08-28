@@ -1,79 +1,112 @@
+substitutions:
+  name: "esp32-tailscale-gateway"
+  friendly_name: "ESP32 Tailscale Gateway"
+
 esphome:
-  name: esp32-tailscale
-  friendly_name: "ESP32 Tailscale"
+  name: "${name}"
+  friendly_name: "${friendly_name}"
 
 esp32:
   board: esp32-s3-devkitc-1
   framework:
     type: esp-idf
+    sdkconfig_options:
+      CONFIG_LWIP_TCPIP_TASK_STACK_SIZE: "6144"
+      CONFIG_LWIP_TCPIP_CORE_LOCKING: n
 
-# Pull the tailscale component + all entities from the GitHub package.
-# This is exactly what an end user would do — guarantees the build output
-# matches what users get when they include the package. `refresh: always`
-# disables the default 1-day cache so dev flashes always see the latest main.
-packages:
-  tailscale:
-    url: https://github.com/Csontikka/esphome-tailscale
-    ref: main
-    refresh: always
-    files:
-      - packages/tailscale/tailscale.yaml
+external_components:
+  - source:
+      type: git
+      url: https://github.com/KamilDz1990/esphome-tailscale.git
+      ref: main
+    components:
+      - tailscale
+    refresh: 0s
 
-# PSRAM init — uncomment the block matching your hardware (the
-# `esp32-s3-devkitc-1` board defaults configure octal/80MHz, which works
-# only on N8R8 / N16R8 modules — quad-PSRAM N8R2 / N16R2 boards need an
-# explicit override). Note: ESPHome's `psram:` block forces the configured
-# mode, it does NOT auto-detect; the octal block does NOT work on quad
-# hardware and vice versa. See README → Troubleshooting → "Device Memory
-# shows Internal RAM" if PSRAM detection seems wrong.
-#
-# For N8R8 / N16R8 modules (8 MB Octal PSRAM, most common):
-# psram:
-#   mode: octal
-#   speed: 80MHz
-#
-# For N8R2 / N16R2 modules (2 MB Quad PSRAM):
-# psram:
-#   mode: quad
-#   speed: 40MHz
+psram:
+  mode: octal
+  speed: 80MHz
 
-tailscale:
-  auth_key: !secret tailscale_auth_key
-  hostname: "esp32-tailscale"
-  # max_peers: 16  # Optional, default 16
-  # login_server: "http://192.168.1.42:8080"  # Optional, for Headscale / self-hosted control plane
-  #                                           # See contrib/headscale-test/ for a local docker-compose
-
+# No Wi-Fi credentials are required in the firmware.
+# On first boot the fallback AP + captive portal can be used to configure Wi-Fi.
 wifi:
-  ssid: !secret wifi_ssid
-  password: !secret wifi_password
-  # use_address: "100.x.x.x"  # Set to your Tailscale VPN IP after first boot
+  power_save_mode: none
+  ap:
+    ssid: "${name}"
+    password: "change-me-123"
 
-# --- Ethernet instead of WiFi? ---
-# The tailscale component works over Ethernet too — it only needs *some*
-# network, not WiFi specifically. On a wired board (e.g. Waveshare
-# ESP32-S3-ETH, or any LAN8720 / W5500 design), DELETE the `wifi:` block
-# above and use an `ethernet:` block instead. Pin `use_address` here, not
-# under wifi. Adjust pins to match your board.
-#
-# ethernet:
-#   type: W5500            # or LAN8720, etc.
-#   clk_pin: GPIO13
-#   mosi_pin: GPIO11
-#   miso_pin: GPIO12
-#   cs_pin: GPIO14
-#   interrupt_pin: GPIO10
-#   reset_pin: GPIO9
-#   # use_address: "100.x.x.x"  # Set to your Tailscale VPN IP after first boot
+captive_portal:
 
 logger:
-  level: DEBUG
-  hardware_uart: UART0
+  level: INFO
 
 api:
+  reboot_timeout: 0s
+
+ota:
+  - platform: esphome
 
 web_server:
   port: 80
 
-ota:
-  platform: esphome
+# No auth_key is required here.
+# The key can be entered after boot through the Tailscale Auth Key text entity.
+tailscale:
+  hostname: "${name}"
+  max_peers: 16
+  advertise_routes: "192.168.0.0/24"
+  gateway_snat: true
+  disable_telemetry: true
+
+text:
+  - platform: tailscale
+    auth_key:
+      name: "Tailscale Auth Key"
+      id: tailscale_auth_key_web
+      icon: mdi:key-variant
+      mode: password
+
+binary_sensor:
+  - platform: tailscale
+    connected:
+      name: "VPN Connected"
+      icon: mdi:vpn
+    subnet_router:
+      name: "Subnet Router"
+      icon: mdi:router-network
+
+switch:
+  - platform: tailscale
+    vpn_enabled:
+      name: "VPN Enabled"
+      id: tailscale_vpn_enabled
+      icon: mdi:vpn
+
+sensor:
+  - platform: wifi_signal
+    name: "WiFi Signal"
+    update_interval: 30s
+    entity_category: diagnostic
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "WiFi IP"
+      entity_category: diagnostic
+    ssid:
+      name: "WiFi SSID"
+      entity_category: diagnostic
+    mac_address:
+      name: "WiFi MAC"
+      entity_category: diagnostic
+
+  - platform: uptime
+    name: "Device Uptime"
+    icon: mdi:timer-check
+    update_interval: 60s
+    format:
+      separator: " "
+      days: " dni"
+      hours: "h"
+      minutes: "min"
+    entity_category: diagnostic
