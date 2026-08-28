@@ -225,7 +225,7 @@ switch:
       name: "VPN Enabled"
 ```
 
-See [`example.yaml`](example.yaml) for a ready-to-use example.
+See [`esp32-s3-tailscale-gateway.yaml`](esp32-s3-tailscale-gateway.yaml) for a ready-to-use example.
 
 ## Tailscale setup
 
