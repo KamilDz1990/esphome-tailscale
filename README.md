@@ -157,12 +157,12 @@ These steps apply to [`esp32-s3-tailscale-gateway_22102026.yaml`](esp32-s3-tails
 
 ### Device naming
 
-- **Display name and setup Wi-Fi SSID:** `ESP32-S3 Tailscale Gateway`.
-- **ESPHome node name and Tailscale hostname:** `esp32-s3-tailscale-gateway`.
+- **Display name:** `ESP32-S3 Tailscale Gateway`.
+- **ESPHome node name, setup Wi-Fi SSID and Tailscale hostname:** `esp32-s3-tailscale-gateway`.
 - **Local address:** `http://esp32-s3-tailscale-gateway.local/`, where supported.
 - **Firmware version entity:** `Wersja oprogramowania`.
 
-The full YAML uses `friendly_name` for the display name and setup SSID, and `name` for the ESPHome node and Tailscale hostname. Network hostnames use lowercase letters and hyphens rather than spaces; see [ESPHome naming rules](https://esphome.io/components/esphome/#configuration-variables). Existing firmware keeps its previous names until updated. If an existing Tailscale device has a manually assigned name, check its name in the admin console after updating.
+The full YAML uses `friendly_name` for the display name, and the same `name` for the ESPHome node, setup SSID and Tailscale hostname. Network hostnames use lowercase letters and hyphens rather than spaces; see [ESPHome naming rules](https://esphome.io/components/esphome/#configuration-variables). Existing firmware keeps its previous names until updated. If an existing Tailscale device has a manually assigned name, check its name in the admin console after updating.
 
 ### Hardware and network
 
@@ -175,7 +175,7 @@ The advertised LAN is **`192.168.0.0/24`** (mask `255.255.255.0`). If your LAN u
 ### Connect Wi-Fi
 
 1. Power on the gateway and allow approximately one minute for the fallback access point to appear if Wi-Fi is not configured.
-2. Connect your phone or laptop to **`ESP32-S3 Tailscale Gateway`**, password **`1234567890`**. Stay connected even if the device reports no Internet access.
+2. Connect your phone or laptop to **`esp32-s3-tailscale-gateway`**, password **`1234567890`**. Stay connected even if the device reports no Internet access.
 3. Open the captive portal, or enter **http://192.168.4.1/** manually.
 4. Select your home 2.4 GHz Wi-Fi network, enter its password, and save.
 5. Reconnect your phone or laptop to your home network.
@@ -265,7 +265,7 @@ psram:
 wifi:
   power_save_mode: none
   ap:
-    ssid: "ESP32-S3 Tailscale Gateway"
+    ssid: "esp32-s3-tailscale-gateway"
     password: "change-me-123"
 
 captive_portal:
