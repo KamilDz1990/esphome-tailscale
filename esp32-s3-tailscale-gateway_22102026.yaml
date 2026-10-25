@@ -19,9 +19,9 @@ esphome:
       - text_sensor.template.publish:
           id: esp_status
           state: "Normalny"
-      # Publikacja aktualnej wersji ESPEMS.  
+      # Publikacja aktualnej wersji ESP32-S3 Tailscale Gateway.  
       - text_sensor.template.publish:
-          id: espems_revision
+          id: gateway_revision
           state: "${revision}"          
       - delay: 2s
       - lambda: |-
@@ -82,7 +82,7 @@ wifi:
     - delay: 250ms
     - script.execute: update_status_led
   ap:
-    ssid: "${name}"
+    ssid: "${friendly_name}"
     password: "1234567890"
 
 captive_portal:
@@ -121,7 +121,7 @@ light:
   
 tailscale:
  # auth_key: !secret tailscale_auth_key
-  hostname: "esp32-tailscale-gateway"
+  hostname: "${name}"
   max_peers: 16
   advertise_routes: "192.168.0.0/24"
   gateway_snat: true
@@ -226,8 +226,8 @@ text:
 text_sensor:
 
   - platform: template
-    name: "Wersja ESPEMS"
-    id: espems_revision
+    name: "Wersja oprogramowania"
+    id: gateway_revision
     icon: mdi:tag-text-outline
     entity_category: diagnostic
     update_interval: never 
