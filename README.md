@@ -100,7 +100,7 @@ The device can therefore boot with no Tailscale credentials compiled into the fi
 
 ```yaml
 tailscale:
-  hostname: "esp32-tailscale-gateway"
+  hostname: "esp32-s3-tailscale-gateway"
   advertise_routes: "192.168.0.0/24"
   gateway_snat: true
 ```
@@ -155,6 +155,15 @@ This allows the same firmware image to be deployed on multiple ESP32-S3 devices 
 
 These steps apply to [`esp32-s3-tailscale-gateway_22102026.yaml`](esp32-s3-tailscale-gateway_22102026.yaml), revision **22102026**, on a device with this firmware already installed. A YAML file is a build configuration, not a flashable firmware image.
 
+### Device naming
+
+- **Display name and setup Wi-Fi SSID:** `ESP32-S3 Tailscale Gateway`.
+- **ESPHome node name and Tailscale hostname:** `esp32-s3-tailscale-gateway`.
+- **Local address:** `http://esp32-s3-tailscale-gateway.local/`, where supported.
+- **Firmware version entity:** `Wersja oprogramowania`.
+
+The full YAML uses `friendly_name` for the display name and setup SSID, and `name` for the ESPHome node and Tailscale hostname. Network hostnames use lowercase letters and hyphens rather than spaces; see [ESPHome naming rules](https://esphome.io/components/esphome/#configuration-variables). Existing firmware keeps its previous names until updated. If an existing Tailscale device has a manually assigned name, check its name in the admin console after updating.
+
 ### Hardware and network
 
 The current configuration targets an **ESP32-S3-DevKitC-1 with 16 MB flash and octal PSRAM at 80 MHz**, with a WS2812 RGB LED on **GPIO48**. Check that your board matches these settings before building and flashing.
@@ -166,7 +175,7 @@ The advertised LAN is **`192.168.0.0/24`** (mask `255.255.255.0`). If your LAN u
 ### Connect Wi-Fi
 
 1. Power on the gateway and allow approximately one minute for the fallback access point to appear if Wi-Fi is not configured.
-2. Connect your phone or laptop to **`esp32-s3-tailscale-gateway`**, password **`1234567890`**. Stay connected even if the device reports no Internet access.
+2. Connect your phone or laptop to **`ESP32-S3 Tailscale Gateway`**, password **`1234567890`**. Stay connected even if the device reports no Internet access.
 3. Open the captive portal, or enter **http://192.168.4.1/** manually.
 4. Select your home 2.4 GHz Wi-Fi network, enter its password, and save.
 5. Reconnect your phone or laptop to your home network.
@@ -180,7 +189,7 @@ The setup address `192.168.4.1` is separate from the address assigned by your ho
 2. In the gateway's local web interface, paste the full key into **Tailscale Auth Key** and save the field.
 3. Make sure **VPN Enabled** is on.
 4. Wait for **VPN Connected** and **Subnet Router** to become active.
-5. In the Tailscale admin console, locate **`esp32-tailscale-gateway`**. Approve the device if required, then approve its advertised route **`192.168.0.0/24`**.
+5. In the Tailscale admin console, locate **`esp32-s3-tailscale-gateway`**. Approve the device if required, then approve its advertised route **`192.168.0.0/24`**.
 6. Check that your tailnet access policy permits the intended users/devices to access the target LAN services.
 
 **Subnet Router** reports the gateway's local routing state. It does not confirm that the route has been approved or that your access policy allows a remote client.
@@ -229,8 +238,8 @@ For more detail, see [ESPHome Captive Portal](https://esphome.io/components/capt
 
 ```yaml
 esphome:
-  name: esp32-tailscale-gateway
-  friendly_name: ESP32 Tailscale Gateway
+  name: esp32-s3-tailscale-gateway
+  friendly_name: ESP32-S3 Tailscale Gateway
 
 esp32:
   board: esp32-s3-devkitc-1
@@ -256,7 +265,7 @@ psram:
 wifi:
   power_save_mode: none
   ap:
-    ssid: "esp32-tailscale-gateway"
+    ssid: "ESP32-S3 Tailscale Gateway"
     password: "change-me-123"
 
 captive_portal:
@@ -274,7 +283,7 @@ web_server:
   port: 80
 
 tailscale:
-  hostname: "esp32-tailscale-gateway"
+  hostname: "esp32-s3-tailscale-gateway"
   max_peers: 16
   advertise_routes: "192.168.0.0/24"
   gateway_snat: true
@@ -299,7 +308,7 @@ switch:
       name: "VPN Enabled"
 ```
 
-See [`esp32-s3-tailscale-gateway_22102026.yaml`](esp32-s3-tailscale-gateway_22102026.yaml) for the full configuration, including LED status and factory reset. The minimal example above uses a different setup SSID/password and omits these features. Older configurations are kept in [`stare/`](stare/).
+See [`esp32-s3-tailscale-gateway_22102026.yaml`](esp32-s3-tailscale-gateway_22102026.yaml) for the full configuration, including LED status and factory reset. The minimal example above uses a different setup password and omits these features. Older configurations are kept in [`stare/`](stare/).
 
 ## Tailscale setup
 
