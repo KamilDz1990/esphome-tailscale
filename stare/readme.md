@@ -1,0 +1,1 @@
+Archiwalne wersje konfiguracji.
