@@ -82,7 +82,7 @@ wifi:
     - delay: 250ms
     - script.execute: update_status_led
   ap:
-    ssid: "${friendly_name}"
+    ssid: "${name}"
     password: "1234567890"
 
 captive_portal:
